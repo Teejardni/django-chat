@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Chat {{ room_name }}</title></head>
+<body>
+  <h1>Room: {{ room_name }}</h1>
+  <div id="history">
+    {% for m in history %}
+      <div><strong>{{ m.user.username|default:"anon" }}</strong>: {{ m.text }}</div>
+    {% endfor %}
+  </div>
+  <input id="msg" autocomplete="off" /><button id="send">Send</button>
+
+  <script>
+    const roomName = "{{ room_name }}";
+    const scheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${scheme}://${window.location.host}/ws/chat/${roomName}/`);
+
+    ws.onmessage = (e) => {
+      const { user, text } = JSON.parse(e.data);
+      const line = document.createElement("div");
+      line.innerHTML = `<strong>${user}</strong>: ${text}`;
+      document.querySelector("#history").appendChild(line);
+    };
+
+    document.querySelector("#send").onclick = () => {
+      const text = document.querySelector("#msg").value;
+      ws.send(JSON.stringify({ text }));
+      document.querySelector("#msg").value = "";
+    };
+  </script>
+</body>
+</html>

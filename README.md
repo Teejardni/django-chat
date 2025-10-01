@@ -1,0 +1,1 @@
+A quick test to see how django can be used for async chats
